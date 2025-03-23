@@ -78,13 +78,11 @@ AtomicRingBuffer rb;
 
 /* ATOMIC RINGBUFFER END*/
 
-
 typedef struct {
     struct pw_main_loop* loop;
     struct pw_stream* stream;
 
     struct spa_audio_info format;
-    unsigned move:1;
 } Data;
 
 static void on_process(void* userdata){
@@ -112,12 +110,6 @@ static void on_process(void* userdata){
 
     for (c = 0; c<mono_sample_count;c++ ) {
         mono_buffer[c] = samples[c * n_channels];
-
-        /*for (n = c; n<n_samples; n+=n_channels) {
-            max = fmaxf(max, fabsf(samples[n]));
-        }
-        peak = SPA_CLAMP(max *30, 0, 39);
-        printf("channel %d: |%*s%*s| peak:%f\n", c, peak+1, "*", 40-peak, "", max);*/
     }
     writeAtomicRingBuffer(&rb, mono_buffer, FRAMES_PER_BUFFER);
     pw_stream_queue_buffer(data->stream, b);
@@ -152,6 +144,7 @@ static const struct pw_stream_events stream_events = {
 };
 
 static void do_quit(void* userdata, int signal_number) {
+    (void)signal_number;
     Data* data = (Data*)userdata;
     pw_main_loop_quit(data->loop);
 }
@@ -215,7 +208,6 @@ int main(int argc, char *argv[]) {
     Vector2* points = (Vector2*)malloc(FRAMES_PER_BUFFER*sizeof(Vector2));
     int x = FRAMES_PER_BUFFER;
     int y = 600;
-
 
     InitWindow(x, y, "julius - Audio Analyzing and Visulizing");
     
