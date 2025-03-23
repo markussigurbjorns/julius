@@ -190,7 +190,7 @@ void* run_audio_loop(void *userdata) {
     pw_stream_connect(data.stream, 
                       PW_DIRECTION_INPUT, 
                       PW_ID_ANY, 
-                      PW_STREAM_FLAG_AUTOCONNECT | PW_STREAM_FLAG_MAP_BUFFERS | PW_STREAM_FLAG_RT_PROCESS, 
+                      PW_STREAM_FLAG_MAP_BUFFERS | PW_STREAM_FLAG_RT_PROCESS, 
                       params,
                       1);
     pw_main_loop_run(data.loop);
