@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <raylib.h>
+#include <complex.h>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdlib.h>
@@ -77,6 +78,27 @@ static bool readAtomicRingBuffer(AtomicRingBuffer *rb, float *data, int numSampl
 AtomicRingBuffer rb;
 
 /* ATOMIC RINGBUFFER END*/
+
+/* FFT  */
+
+void fft(float* x, size_t n, size_t s, float complex* X){
+    if (n == 1) {
+        X[0] = x[0];
+    } else {
+        fft(x, n/2, 2*s, X);
+        fft(x+s, n/2, 2*s, X + n/2);
+
+        for (size_t k = 0; k<n/2; k++) {
+            float complex tmp = X[k];
+            float complex t = cexp(-2.0f * I * (float)M_PI * k / n) * X[k + n/2];
+            X[k] = tmp + t;
+            X[k + n/2] = tmp - t;
+        }
+    }
+}
+
+/* FFT END*/
+
 
 typedef struct {
     struct pw_main_loop* loop;
@@ -196,7 +218,8 @@ void* run_audio_loop(void *userdata) {
 
 int main(int argc, char *argv[]) {
 
-    float *buffer = malloc(FRAMES_PER_BUFFER * sizeof(float));
+    float buffer[FRAMES_PER_BUFFER];
+    float complex spectral_out[FRAMES_PER_BUFFER];
 
     initAtomicRingBuffer(&rb, RING_BUFFER_SIZE);
 
@@ -205,7 +228,9 @@ int main(int argc, char *argv[]) {
     pthread_t audioThread;
     pthread_create(&audioThread, NULL, run_audio_loop, NULL);
     
-    Vector2* points = (Vector2*)malloc(FRAMES_PER_BUFFER*sizeof(Vector2));
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+
+    Vector2* points = (Vector2*)malloc(FRAMES_PER_BUFFER/2*sizeof(Vector2));
     int x = FRAMES_PER_BUFFER;
     int y = 600;
 
@@ -213,19 +238,47 @@ int main(int argc, char *argv[]) {
     
     SetTargetFPS(60);
     while (!WindowShouldClose()) {
+        int currentScreenWidth = GetScreenWidth();
+        int currentScreenHeight = GetScreenHeight();        
+        Rectangle audioWidget = {
+            .x = 50,
+            .y = 50,
+            .width = currentScreenWidth - 100,
+            .height = currentScreenHeight - 100
+        };
+
+        readAtomicRingBuffer(&rb, buffer, FRAMES_PER_BUFFER);
+        fft(buffer, FRAMES_PER_BUFFER, 1, spectral_out);
+
+        float maxMagnitude = 0.0f;
+
+        // First pass: determine the maximum magnitude for normalization
+        for (int i = 0; i < FRAMES_PER_BUFFER/2; i++) {
+            float mag = cabsf(spectral_out[i]);
+            if (mag > maxMagnitude) {
+                maxMagnitude = mag;
+            }
+        }
+
+        for (int i = 0; i<FRAMES_PER_BUFFER/2; i++) {
+            float normalizedX = (float)i / ((FRAMES_PER_BUFFER/2.0f) - 1);
+            points[i].x = audioWidget.x + normalizedX * audioWidget.width;
+
+            //float normalizedY = (buffer[i] + 1.0f) / 2.0f;
+            //float magnitude = 20 * log10f(cabsf(spectral_out[i]) + 1e-6f);
+            float magnitude = cabsf(spectral_out[i]);
+            float normalizedMagnitude = (maxMagnitude > 0) ? magnitude / maxMagnitude : 0;
+            points[i].y = audioWidget.y + (1.0f - normalizedMagnitude) * audioWidget.height;
+        }
+
         BeginDrawing();
         ClearBackground(RAYWHITE);
         DrawFPS(0, 0);
-        readAtomicRingBuffer(&rb, buffer, FRAMES_PER_BUFFER);
-        for (int i = 0; i<FRAMES_PER_BUFFER; i++) {
-            points[i].x=i;
-            points[i].y=(buffer[i]+1.0f)* 300.0f;
-        }
-        DrawLineStrip(points, FRAMES_PER_BUFFER, RED);
+        DrawRectangleLines(audioWidget.x, audioWidget.y, audioWidget.width, audioWidget.height, LIGHTGRAY);
+        DrawLineStrip(points, FRAMES_PER_BUFFER/2, RED);
         EndDrawing();
     }
 
     CloseWindow();
-
     return 0;
 }
