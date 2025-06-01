@@ -27,7 +27,6 @@ common_c_args = [
 
 # Get source files
 lvgl_src = run_command('find', 'lvgl/src', '-type', 'f', '-name', '*.c', check: true).stdout().strip().split('\n')
-lv_drivers_src = run_command('find', 'lv_drivers', '-type', 'f', '-name', '*.c', check: true).stdout().strip().split('\n')
 
 # Build LVGL core
 lvgl_lib = static_library(
