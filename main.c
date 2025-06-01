@@ -34,23 +34,23 @@ int main(int argc, char *argv[])
 {
     /* --- subsystem init ------------------------------------------------- */
     gst_init(&argc, &argv);
-    su_init();                                     /* Sofia-SIP core */
+    su_init();                          
 
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
         fprintf(stderr, "SDL: %s\n", SDL_GetError());
         return 1;
     }
 
-    lv_init();                                     /* LVGL core      */
+    lv_init();                               
     char* host_ip = get_host_ipv4();
 
     setup_gui(host_ip);
-    /* --- SIP stack ------------------------------------------------------ */
-    su_root_t *root = ua_init();                  /* your helper: returns su_root_t* */
+
+    su_root_t *root = ua_init();          
 
     /* --- main loop (GLib) ---------------------------------------------- */
     GMainLoop *loop   = g_main_loop_new(NULL, FALSE);
-    GSource   *source = su_glib_root_gsource(root);  /* integrate Sofia-SIP */
+    GSource   *source = su_glib_root_gsource(root); 
     g_source_attach(source, g_main_loop_get_context(loop));
 
     g_timeout_add_full(G_PRIORITY_HIGH, 1,  lv_tick_cb,  NULL, NULL);

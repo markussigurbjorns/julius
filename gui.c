@@ -18,13 +18,11 @@ static void call_btn_cb(lv_event_t * e)
 
     const char * to = lv_textarea_get_text(ta);
 
-    g_print("Input field says: \"%s\"\n", to ? to : "(empty)");
     ua_invite(to);
 }
 
 static void reg_btn_cb(lv_event_t *e)
 {
-    g_print("Register button pressed – do SIP register here\n");
     ua_register();
 }
 
@@ -84,7 +82,7 @@ void setup_gui(char *host_ip) {
 
     /* --- On-screen keyboard ------------------------------------------ */
     kb = lv_keyboard_create(lv_scr_act());
-    lv_obj_set_size(kb, 320, 180);                /* tweak as needed */
+    lv_obj_set_size(kb, 320, 180);            
     lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);
     lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);      /* start hidden    */
     lv_keyboard_set_textarea(kb, ta);
