@@ -120,7 +120,7 @@ void ua_register(void) {
     }
 
     nua_register(op->handle,
-                SIPTAG_CONTACT_STR("sips:markus@84.211.226.73:5061;transport=tls"),
+                SIPTAG_CONTACT_STR("sips:markus@testdomain.com;transport=tls"),
                 NUTAG_M_USERNAME("markus"),
                 SIPTAG_EXPIRES_STR("3600"),
                 TAG_NULL()); 
@@ -137,5 +137,6 @@ void ua_invite(const gchar *to) {
     }
 
     nua_invite(op->handle, NUTAG_MEDIA_ENABLE(0), //disable sdp engine for now
+               SIPTAG_CONTACT_STR("sips:markus@testdomain.com;transport=tls"),
                TAG_NULL());
 }
