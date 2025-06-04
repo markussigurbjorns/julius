@@ -961,11 +961,11 @@
  *==================*/
 
 /*Use SDL to open window on PC and handle mouse and keyboard*/
-#define LV_USE_SDL              1
+#define LV_USE_SDL              0
 #if LV_USE_SDL
     #define LV_SDL_INCLUDE_PATH     <SDL2/SDL.h>
-    #define SDL_HOR_RES 800
-    #define SDL_VER_RES 480
+    #define SDL_HOR_RES 1280
+    #define SDL_VER_RES 720
     #define LV_SDL_RENDER_MODE      LV_DISPLAY_RENDER_MODE_DIRECT   /*LV_DISPLAY_RENDER_MODE_DIRECT is recommended for best performance*/
     #define LV_SDL_BUF_COUNT        1    /*1 or 2*/
     #define LV_SDL_ACCELERATED      1    /*1: Use hardware acceleration*/
@@ -1023,13 +1023,13 @@
 #endif
 
 /*Driver for /dev/dri/card*/
-#define LV_USE_LINUX_DRM        0
+#define LV_USE_LINUX_DRM        1
 
 /*Interface for TFT_eSPI*/
 #define LV_USE_TFT_ESPI         0
 
 /*Driver for evdev input devices*/
-#define LV_USE_EVDEV    0
+#define LV_USE_EVDEV    1
 
 /*Driver for libinput input devices*/
 #define LV_USE_LIBINPUT    0

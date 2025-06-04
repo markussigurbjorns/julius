@@ -8,7 +8,8 @@ project(
 cc = meson.get_compiler('c')
 
 # ------------------------------------------------------------------ LVGL
-sdl2_dep = dependency('sdl2')
+#sdl2_dep = dependency('sdl2')
+drm_dep = dependency('libdrm')
 
 # Include directories - add core LVGL directories first
 includes = include_directories(
@@ -34,7 +35,7 @@ lvgl_lib = static_library(
   lvgl_src,
   include_directories: includes,
   c_args: common_c_args,
-  dependencies: sdl2_dep,
+  dependencies: drm_dep,
 )
 
 # Combined dependency
@@ -44,10 +45,8 @@ lvgl_dep = declare_dependency(link_with: [lvgl_lib], include_directories: includ
 gst_dep = dependency('gstreamer-1.0', required: true)
 gst_base_dep = dependency('gstreamer-base-1.0', fallback: ['gstreamer', 'gst_base_dep'])
 
-gtk_dep = dependency('gtk4', required: true)
-
-sofia_sip_dep = dependency('sofia-sip-ua', required: true)
-sofia_sip_glib_dep = dependency('sofia-sip-ua-glib', required: true)
+#sofia_sip_dep = dependency('sofia-sip-ua', required: true)
+#sofia_sip_glib_dep = dependency('sofia-sip-ua-glib', required: true)
 
 glib_dep = dependency('glib-2.0', required: true)
 
@@ -55,7 +54,7 @@ src_files = files(
   'gui.c',
   'main.c',
   'network.c',
-  'ua.c',
+  #'ua.c',
 )
 
 executable(
@@ -64,11 +63,10 @@ executable(
   dependencies: [
     gst_dep,
     gst_base_dep,
-    gtk_dep,
-    sofia_sip_dep,
-    sofia_sip_glib_dep,
+    #sofia_sip_dep,
+    #sofia_sip_glib_dep,
     glib_dep,
     lvgl_dep,
-    sdl2_dep,
+    drm_dep,
   ],
 )
