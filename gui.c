@@ -40,6 +40,8 @@ static void ta_focus_cb(lv_event_t *e)
 
 void setup_gui(char *host_ip) {
     lv_display_t *disp = lv_linux_drm_create();
+    lv_linux_drm_set_file(disp, "/dev/dri/card1", -1);
+
     lv_indev_t *touch = lv_evdev_create(LV_INDEV_TYPE_POINTER,
                                         "/dev/input/event3");
     //lv_display_t *lvDisplay = lv_sdl_window_create(SDL_HOR_RES, SDL_VER_RES);

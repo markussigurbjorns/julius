@@ -1,0 +1,22 @@
+[binaries]
+c           = '/home/maggi/Documents/workspace/julius_build/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/bin/aarch64-buildroot-linux-gnu-gcc'
+cpp         = '/home/maggi/Documents/workspace/julius_build/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/bin/aarch64-buildroot-linux-gnu-g++'
+ar          = '/home/maggi/Documents/workspace/julius_build/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/bin/aarch64-buildroot-linux-gnu-ar'
+strip       = '/home/maggi/Documents/workspace/julius_build/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/bin/aarch64-buildroot-linux-gnu-strip'
+ld          = '/home/maggi/Documents/workspace/julius_build/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/bin/aarch64-buildroot-linux-gnu-ld'
+pkg-config  = '/home/maggi/Documents/workspace/julius_build/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/bin/pkg-config'
+
+[properties]  
+sys_root               = '/home/maggi/Documents/workspace/julius_build/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/aarch64-buildroot-linux-gnu/sysroot'
+c_args                 = ['--sysroot=/home/maggi/Documents/workspace/julius_build/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/aarch64-buildroot-linux-gnu/sysroot']
+c_link_args            = ['--sysroot=/home/maggi/Documents/workspace/julius_build/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/aarch64-buildroot-linux-gnu/sysroot']
+cpp_args               = c_args
+cpp_link_args          = c_link_args
+pkg_config_sysroot_dir = '/home/maggi/Documents/workspace/julius_build/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/aarch64-buildroot-linux-gnu/sysroot'
+pkg_config_libdir      = '/home/maggi/Documents/workspace/julius_build/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/aarch64-buildroot-linux-gnu/sysroot/usr/lib/pkgconfig:/home/maggi/Documents/workspace/julius_build/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/aarch64-buildroot-linux-gnu/sysroot/usr/share/pkgconfig'
+
+[host_machine]
+system     = 'linux'
+cpu_family = 'aarch64'
+cpu        = 'cortex-a72'
+endian     = 'little'

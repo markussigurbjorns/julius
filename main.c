@@ -32,19 +32,26 @@ static gboolean lv_timer_cb(gpointer user_data)     /* 5 ms handler */
 
 int main(int argc, char *argv[])
 {
+    printf("launch program\n");
     /* --- subsystem init ------------------------------------------------- */
     gst_init(&argc, &argv);
     //su_init();                          
+
+    printf("after gst init\n");
 
     //if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
     //    fprintf(stderr, "SDL: %s\n", SDL_GetError());
     //    return 1;
     //}
 
-    lv_init();                               
+    lv_init();             
+    printf("after lv init\n");
+
     char* host_ip = get_host_ipv4();
 
+    printf("after getting host ip\n");
     setup_gui(host_ip);
+    printf("after setting up gui\n");
 
     //su_root_t *root = ua_init();          
 
@@ -56,6 +63,8 @@ int main(int argc, char *argv[])
     g_timeout_add_full(G_PRIORITY_HIGH, 1,  lv_tick_cb,  NULL, NULL);
     g_timeout_add_full(G_PRIORITY_DEFAULT, 5, lv_timer_cb, NULL, NULL);
 
+
+    printf("running loop\n");
     g_main_loop_run(loop);
 
     /* --- clean-up ------------------------------------------------------- */
