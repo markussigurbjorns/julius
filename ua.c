@@ -28,14 +28,22 @@ static void ua_event_callback(nua_event_t   event,
     switch (event) {
         case nua_i_state: {
             g_print("in nua_i_state");
-            const gchar *remote_txt = NULL;
+            const gchar *remote_sdp = NULL;
+            gint is_offer = 0, is_answer = 0;
             tl_gets(tags,
-                SOATAG_REMOTE_SDP_STR_REF(remote_txt),
+                SOATAG_REMOTE_SDP_STR_REF(remote_sdp),
+                NUTAG_OFFER_RECV_REF(is_offer),
+                NUTAG_ANSWER_RECV_REF(is_answer),
                 TAG_END());
 
-            if (remote_txt) {
-                g_message("----- remote SDP -----\n%s", remote_txt);
-                /* start/adjust GStreamer pipeline */
+            if (remote_sdp) {
+                if (is_offer) {
+                    g_message("----- remote SDP offer -----\n%s", remote_sdp);
+                    process_offer(remote_sdp);
+                } else if (is_answer) {
+                    g_message("----- remote SDP answer -----\n%s", remote_sdp);
+                    process_answer(remote_sdp);
+                }
             }
             break;
         }

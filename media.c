@@ -26,3 +26,11 @@ gchar *get_invite_sdp() {
 
     return sdp_builder_to_string(b);
 }
+
+void process_offer(const gchar *offer) {
+
+}
+
+void process_answer(const gchar* answer) {
+
+}
