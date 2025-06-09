@@ -9,7 +9,6 @@ cc = meson.get_compiler('c')
 
 add_project_arguments('-w', language: 'c')
 # ------------------------------ Configurations --------------------
-#
 # Configuration defines
 common_c_args = [
   '-DLV_CONF_INCLUDE_SIMPLE=1',
@@ -90,6 +89,7 @@ sofia_sip_glib_dep = declare_dependency(
 
 gst_dep = dependency('gstreamer-1.0', required: true)
 gst_base_dep = dependency('gstreamer-base-1.0', fallback: ['gstreamer', 'gst_base_dep'])
+gst_sdp_dep = dependency('gstreamer-sdp-1.0', fallback: ['gstreamer', 'gst_sdp_dep'])
 
 # --------------------------- executable ---------------------------------
 
@@ -98,13 +98,16 @@ glib_dep = dependency('glib-2.0', required: true)
 src_files = files(
   'gui.c',
   'main.c',
+  'media.c',
   'network.c',
+  'sdp_builder_impl.c',
   'ua.c',
 )
 
 deps = [
   gst_dep,
   gst_base_dep,
+  gst_sdp_dep,
   sofia_sip_dep,
   sofia_sip_glib_dep,
   glib_dep,

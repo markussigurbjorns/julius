@@ -16,7 +16,6 @@
 #define SDL_MAIN_HANDLED        /*To fix SDL's "undefined reference to WinMain" issue*/
 #endif
 
-
 /* ---------- GLib wrappers ---------- */
 static gboolean lv_tick_cb(gpointer user_data)      /* 1 ms tick */
 {

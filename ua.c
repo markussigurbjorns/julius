@@ -8,6 +8,7 @@
 #include "sofia-sip/su_alloc.h"
 #include "sofia-sip/su_glib.h"
 #include "sofia-sip/su_tag.h"
+#include "media.h"
 #include <stdlib.h>
 
 static app_ctx *ctx; 
@@ -25,6 +26,19 @@ static void ua_event_callback(nua_event_t   event,
     g_print("Event: %s (%d %s)\n", nua_event_name(event), status, phrase);
 
     switch (event) {
+        case nua_i_state: {
+            g_print("in nua_i_state");
+            const gchar *remote_txt = NULL;
+            tl_gets(tags,
+                SOATAG_REMOTE_SDP_STR_REF(remote_txt),
+                TAG_END());
+
+            if (remote_txt) {
+                g_message("----- remote SDP -----\n%s", remote_txt);
+                /* start/adjust GStreamer pipeline */
+            }
+            break;
+        }
         case nua_r_register: {
             if (status == 200) {
                 g_print("Registration successful!\n");
@@ -36,11 +50,14 @@ static void ua_event_callback(nua_event_t   event,
         case nua_r_invite: {
             if (status == 200) {
                 g_print("Invite Successful\n");
-                g_print("Sending ACK");
-                nua_ack(nh, TAG_NULL());
+                //nua_ack(nh, TAG_NULL()); SOA should send ACK
             } else {
                 g_print("response to INVITE: %03d %s\n", status, phrase);
             }
+            break;
+        }
+        case nua_i_invite: {
+            g_print("incoming INVITE: %03d %s\n", status, phrase);
             break;
         }
         case nua_r_set_params: {
@@ -66,14 +83,14 @@ static void ua_event_callback(nua_event_t   event,
 su_root_t* ua_init(void) {
     ctx = malloc(sizeof(app_ctx));
     if (ctx == NULL) {
-        g_error("failed to create ctx");
+        g_error("failed to create ctx\n");
         exit(1);
     }
 
     su_home_init(ctx->home);
     ctx->root = su_glib_root_create(ctx);
     if (ctx->root == NULL) {
-        g_error("failed to create su root");
+        g_error("failed to create su root\n");
         exit(1);
     }
 
@@ -92,7 +109,7 @@ su_root_t* ua_init(void) {
                           TAG_NULL());
 
     if (ctx->nua == NULL) {
-        g_error("failed to create nua");
+        g_error("failed to create nua\n");
         exit(1);
     }
 
@@ -136,7 +153,14 @@ void ua_invite(const gchar *to) {
         exit(1);
     }
 
-    nua_invite(op->handle, NUTAG_MEDIA_ENABLE(0), //disable sdp engine for now
+    gchar *sdp_invite = get_invite_sdp();
+
+    g_print("SDP\n%s", sdp_invite);
+
+    nua_invite(op->handle,
+               SOATAG_USER_SDP_STR(sdp_invite),
                SIPTAG_CONTACT_STR("sips:markus@testdomain.com;transport=tls"),
                TAG_NULL());
+
+    g_free(sdp_invite);
 }

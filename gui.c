@@ -100,7 +100,7 @@ void setup_gui(char *host_ip) {
 
     /* --- On-screen keyboard ------------------------------------------ */
     kb = lv_keyboard_create(lv_scr_act());
-    lv_obj_set_size(kb, 320, 180);            
+    lv_obj_set_size(kb, 540, 180);            
     lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);
     lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);      /* start hidden    */
     lv_keyboard_set_textarea(kb, ta);
