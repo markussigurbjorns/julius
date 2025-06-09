@@ -1,16 +1,22 @@
 #include <glib.h>
 #include "gui.h"
 #include "lvgl.h"
-//#include "drivers/sdl/lv_sdl_mouse.h"
-//#include "drivers/sdl/lv_sdl_mousewheel.h"
-//#include "drivers/sdl/lv_sdl_keyboard.h"
-//#include "drivers/sdl/lv_sdl_window.h"
+#include "ua.h"
+
+#ifdef JULIUS_USE_DRM
 #include "drivers/display/drm/lv_linux_drm.h"
 #include "drivers/evdev/lv_evdev.h"
-//#include "ua.h"
+#endif
 
-//#define SDL_HOR_RES  1280
-//#define SDL_VER_RES  720
+#ifdef JULIUS_USE_SDL
+#include "drivers/sdl/lv_sdl_mouse.h"
+#include "drivers/sdl/lv_sdl_mousewheel.h"
+#include "drivers/sdl/lv_sdl_keyboard.h"
+#include "drivers/sdl/lv_sdl_window.h"
+#define SDL_HOR_RES  1280
+#define SDL_VER_RES  720
+#endif
+
 
 static lv_obj_t *kb = NULL; 
 
@@ -20,12 +26,12 @@ static void call_btn_cb(lv_event_t * e)
 
     const char * to = lv_textarea_get_text(ta);
 
-    //ua_invite(to);
+    ua_invite(to);
 }
 
 static void reg_btn_cb(lv_event_t *e)
 {
-    //ua_register();
+    ua_register();
 }
 
 static void ta_focus_cb(lv_event_t *e)
@@ -39,15 +45,20 @@ static void ta_focus_cb(lv_event_t *e)
 }
 
 void setup_gui(char *host_ip) {
+#ifdef JULIUS_USE_DRM
     lv_display_t *disp = lv_linux_drm_create();
     lv_linux_drm_set_file(disp, "/dev/dri/card1", -1);
 
     lv_indev_t *touch = lv_evdev_create(LV_INDEV_TYPE_POINTER,
                                         "/dev/input/event3");
-    //lv_display_t *lvDisplay = lv_sdl_window_create(SDL_HOR_RES, SDL_VER_RES);
-    //lv_indev_t *lvMouse = lv_sdl_mouse_create();
-    //lv_indev_t *lvMouseWheel = lv_sdl_mousewheel_create();
-    //lv_indev_t *lvKeyboard = lv_sdl_keyboard_create();
+#endif
+
+#ifdef JULIUS_USE_SDL
+    lv_display_t *lvDisplay = lv_sdl_window_create(SDL_HOR_RES, SDL_VER_RES);
+    lv_indev_t *lvMouse = lv_sdl_mouse_create();
+    lv_indev_t *lvMouseWheel = lv_sdl_mousewheel_create();
+    lv_indev_t *lvKeyboard = lv_sdl_keyboard_create();
+#endif
 
     /* ---------------- Status label (top-left) ------------------------ */
     lv_obj_t *status = lv_label_create(lv_scr_act());

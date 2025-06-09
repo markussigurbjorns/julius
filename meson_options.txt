@@ -1,0 +1,2 @@
+option('use_sdl', type: 'boolean', value: false, description: 'Use SDL backend')
+option('use_drm', type: 'boolean', value: false, description: 'Use DRM backend')
