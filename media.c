@@ -1,5 +1,7 @@
 #include <glib.h>
 #include <gst/gst.h>
+#include "glib-object.h"
+#include "gst/gstcaps.h"
 #include "gst/gstelement.h"
 #include "gst/gstelementfactory.h"
 #include "network.h"
@@ -31,8 +33,10 @@ static void handle_message (GstBus *bus, GstMessage *msg, gpointer user_data)
 gchar *get_invite_sdp() {
     SdpBuilder *b = sdp_builder_new();
 
+    // TODO: HANDLE THE IP PROPERLY THIS IS A MEMORY LEAK
     sdp_builder_set_origin(b, "markus-sip", get_host_ipv4());
     sdp_builder_set_session_name(b, "Julius Call");
+    sdp_builder_set_connection(b, get_host_ipv4(),0 ,0);
     sdp_builder_set_bandwidth(b, "TIAS", 6128000);
     
     /* audioline */
@@ -60,19 +64,53 @@ int process_answer(const gchar* answer) {
 
     GstElement *pipeline = gst_pipeline_new("test-pipeline");
     GstElement *src = gst_element_factory_make("udpsrc", "netsrc");
-    GstElement *sink = gst_element_factory_make("fakesink", "blackhole");
+    GstElement *caps = gst_element_factory_make("capsfilter", "caps");
+    GstElement *depay = gst_element_factory_make("rtph264depay", "depayloader");
+    GstElement *parse = gst_element_factory_make("h264parse", "parse");
+    GstElement *decode = gst_element_factory_make("openh264dec", "decode");
+    GstElement *convert = gst_element_factory_make("videoconvert", "convert");
+    GstElement *sink = gst_element_factory_make("autovideosink", "blackhole");
 
     if (!pipeline || !src || !sink) {
         g_printerr ("Failed to create one or more elements\n");
         return -1;
     }
 
-    g_object_set (src,  "port", 55002, NULL);
-    g_object_set (sink, "sync", FALSE, 
-                       "dump", TRUE,  NULL);
 
-    gst_bin_add_many (GST_BIN (pipeline), src, sink, NULL);
-    if (!gst_element_link (src, sink)) {
+    GstCaps *caps_filter = gst_caps_from_string("application/x-rtp, media=video, payload=96, clock-rate=90000, encoding-name=H264");
+
+    g_object_set (src,  "port", 55002, NULL);
+    g_object_set (caps, "caps", caps_filter, NULL);
+    //g_object_set (sink, "sync", FALSE, 
+    //                   "dump", TRUE,  NULL);
+
+    gst_bin_add_many (GST_BIN (pipeline), src, caps, depay, parse, decode, convert, sink, NULL);
+    if (!gst_element_link (src, caps)) {
+      g_printerr ("Elements could not be linked\n");
+      gst_object_unref (pipeline);
+      return -1;
+    }
+    if (!gst_element_link (caps, depay)) {
+      g_printerr ("Elements could not be linked\n");
+      gst_object_unref (pipeline);
+      return -1;
+    }
+    if (!gst_element_link (depay, parse)) {
+      g_printerr ("Elements could not be linked\n");
+      gst_object_unref (pipeline);
+      return -1;
+    }
+    if (!gst_element_link (parse, decode)) {
+      g_printerr ("Elements could not be linked\n");
+      gst_object_unref (pipeline);
+      return -1;
+    }
+    if (!gst_element_link (decode, convert)) {
+      g_printerr ("Elements could not be linked\n");
+      gst_object_unref (pipeline);
+      return -1;
+    }
+    if (!gst_element_link (convert, sink)) {
       g_printerr ("Elements could not be linked\n");
       gst_object_unref (pipeline);
       return -1;
@@ -84,6 +122,7 @@ int process_answer(const gchar* answer) {
     gst_bus_add_signal_watch (bus);
     g_signal_connect (bus, "message", G_CALLBACK (handle_message), pipeline);
 
+    g_print("PIPELINE SET UP\n");
     return 0;
 
 }

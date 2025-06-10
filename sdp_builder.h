@@ -15,6 +15,10 @@ int sdp_builder_set_origin       (SdpBuilder *b, const gchar *username,
 int sdp_builder_set_session_name (SdpBuilder *b, const gchar *name);
 int sdp_builder_set_bandwidth    (SdpBuilder *b, const gchar *bwtype,
                                   guint32 bandwidth);
+int sdp_builder_set_connection   (SdpBuilder *b,
+                                  const gchar *addr,
+                                  guint       ttl,
+                                  guint       addrs);
 int sdp_builder_add_attribute    (SdpBuilder *b, const gchar *key,
                                   const gchar *value); 
 
@@ -104,6 +108,24 @@ int sdp_builder_set_bandwidth(SdpBuilder *b, const gchar *bwtype,
     g_return_val_if_fail (bwtype != NULL && *bwtype != '\0', -1);
 
     return gst_sdp_message_add_bandwidth (b->msg, bwtype, bandwidth);
+}
+
+int sdp_builder_set_connection   (SdpBuilder *b,
+                                  const gchar *addr,
+                                  guint       ttl,
+                                  guint       addrs)
+{
+    g_return_val_if_fail (b != NULL,-1);
+    g_return_val_if_fail (addr != NULL && *addr != '\0',-1);
+
+    return gst_sdp_message_set_connection (b->msg,
+                                            "IN",                    
+                                            strchr (addr, ':')   
+                                                ? "IP6" : "IP4",   
+                                            addr,
+                                            ttl,
+                                            addrs);  
+
 }
 
 int sdp_builder_add_attribute(SdpBuilder *b, const gchar *key,
