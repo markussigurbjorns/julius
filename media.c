@@ -69,7 +69,7 @@ int process_answer(const gchar* answer) {
     GstElement *parse = gst_element_factory_make("h264parse", "parse");
     GstElement *decode = gst_element_factory_make("openh264dec", "decode");
     GstElement *convert = gst_element_factory_make("videoconvert", "convert");
-    GstElement *sink = gst_element_factory_make("autovideosink", "blackhole");
+    GstElement *sink = gst_element_factory_make("kmssink", "blackhole");
 
     if (!pipeline || !src || !sink) {
         g_printerr ("Failed to create one or more elements\n");
