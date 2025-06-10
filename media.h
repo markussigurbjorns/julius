@@ -6,7 +6,7 @@
 
 gchar *get_invite_sdp();
 void process_offer(const gchar *offer);
-void process_answer(const gchar *answer);
+int process_answer(const gchar *answer);
 
 #endif
 

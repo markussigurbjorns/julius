@@ -1,7 +1,32 @@
 #include <glib.h>
+#include <gst/gst.h>
+#include "gst/gstelement.h"
+#include "gst/gstelementfactory.h"
 #include "network.h"
 #include "media.h"
 
+
+static void handle_message (GstBus *bus, GstMessage *msg, gpointer user_data)
+{
+  GError *err  = NULL;
+  gchar  *debug = NULL;
+
+  switch (GST_MESSAGE_TYPE (msg)) {
+  case GST_MESSAGE_ERROR:
+    gst_message_parse_error (msg, &err, &debug);
+    g_printerr ("ERROR: %s\n", err->message);
+    g_error_free (err);
+    g_free (debug);
+    gst_element_set_state (GST_ELEMENT (user_data), GST_STATE_NULL);
+    break;
+  case GST_MESSAGE_EOS:
+    g_print ("Reached end-of-stream\n");
+    gst_element_set_state (GST_ELEMENT (user_data), GST_STATE_NULL);
+    break;
+  default:
+    break;
+  }
+}
 
 gchar *get_invite_sdp() {
     SdpBuilder *b = sdp_builder_new();
@@ -31,6 +56,34 @@ void process_offer(const gchar *offer) {
 
 }
 
-void process_answer(const gchar* answer) {
+int process_answer(const gchar* answer) {
+
+    GstElement *pipeline = gst_pipeline_new("test-pipeline");
+    GstElement *src = gst_element_factory_make("udpsrc", "netsrc");
+    GstElement *sink = gst_element_factory_make("fakesink", "blackhole");
+
+    if (!pipeline || !src || !sink) {
+        g_printerr ("Failed to create one or more elements\n");
+        return -1;
+    }
+
+    g_object_set (src,  "port", 55002, NULL);
+    g_object_set (sink, "sync", FALSE, 
+                       "dump", TRUE,  NULL);
+
+    gst_bin_add_many (GST_BIN (pipeline), src, sink, NULL);
+    if (!gst_element_link (src, sink)) {
+      g_printerr ("Elements could not be linked\n");
+      gst_object_unref (pipeline);
+      return -1;
+    }
+
+    gst_element_set_state (pipeline, GST_STATE_PLAYING);
+
+    GstBus *bus = gst_element_get_bus (pipeline);
+    gst_bus_add_signal_watch (bus);
+    g_signal_connect (bus, "message", G_CALLBACK (handle_message), pipeline);
+
+    return 0;
 
 }
